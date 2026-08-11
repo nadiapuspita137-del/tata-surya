@@ -46,17 +46,65 @@ function atmosphereTexture(){
   const g=x.createRadialGradient(128,128,8,128,128,128); g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.18,'rgba(105,238,255,.9)');g.addColorStop(.52,'rgba(70,95,255,.18)');g.addColorStop(1,'rgba(0,0,0,0)');x.fillStyle=g;x.fillRect(0,0,256,256);return new THREE.CanvasTexture(c);
 }
 
-const core = new THREE.Group(); scene.add(core);
-const sun = new THREE.Mesh(new THREE.SphereGeometry(13,64,64), new THREE.MeshStandardMaterial({color:0xffffff,emissive:0x7edcff,emissiveIntensity:2.5,roughness:.4}));core.add(sun);
-for(const s of [32,43]) {
-  const glow = new THREE.Sprite(new THREE.SpriteMaterial({map:atmosphereTexture(),color:s===32?0x77eaff:0xa976ff,transparent:true,opacity:s===32?.75:.22,blending:THREE.AdditiveBlending,depthWrite:false}));
-  glow.scale.set(s,s,s);
+const core = new THREE.Group();
+core.position.set(0, 0, 0);
+scene.add(core);
+
+// Logo menjadi inti tata surya sepenuhnya, tanpa bola Matahari di belakang.
+for (const [size, color, opacity] of [[42, 0x63eaff, .42], [58, 0x8c4fff, .16]]) {
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: atmosphereTexture(), color, transparent: true, opacity,
+    blending: THREE.AdditiveBlending, depthWrite: false, depthTest: true
+  }));
+  glow.scale.set(size, size, 1);
   core.add(glow);
 }
 
 const logoTex = new THREE.TextureLoader().load('assets/images/logo.png');
 logoTex.colorSpace = THREE.SRGBColorSpace;
-const logo = new THREE.Sprite(new THREE.SpriteMaterial({map:logoTex,transparent:true,depthTest:false})); logo.scale.set(21,21,1); logo.position.z=13.2; core.add(logo);
+logoTex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+
+const logo3D = new THREE.Group();
+core.add(logo3D);
+
+const coin = new THREE.Mesh(
+  new THREE.CylinderGeometry(12.5, 12.5, 3.2, 96, 1, false),
+  [
+    new THREE.MeshStandardMaterial({color:0x17233e,metalness:.92,roughness:.2}),
+    new THREE.MeshStandardMaterial({color:0x07101f,metalness:.75,roughness:.28}),
+    new THREE.MeshStandardMaterial({color:0x07101f,metalness:.75,roughness:.28})
+  ]
+);
+coin.rotation.x = Math.PI / 2;
+logo3D.add(coin);
+
+const rim = new THREE.Mesh(
+  new THREE.TorusGeometry(12.55,.62,20,110),
+  new THREE.MeshStandardMaterial({color:0x9cf6ff,emissive:0x245dff,emissiveIntensity:1.8,metalness:.82,roughness:.18})
+);
+rim.position.z = 1.72;
+logo3D.add(rim);
+
+const logoFace = new THREE.Mesh(
+  new THREE.CircleGeometry(11.65,96),
+  new THREE.MeshBasicMaterial({map:logoTex,transparent:true,alphaTest:.025,toneMapped:false,depthWrite:true})
+);
+logoFace.position.z = 1.78;
+logo3D.add(logoFace);
+
+const glass = new THREE.Mesh(
+  new THREE.CircleGeometry(11.72,96),
+  new THREE.MeshPhysicalMaterial({color:0xffffff,transparent:true,opacity:.12,roughness:.08,clearcoat:1,clearcoatRoughness:.08,depthWrite:false})
+);
+glass.position.z = 1.86;
+logo3D.add(glass);
+
+const energyRing = new THREE.Mesh(
+  new THREE.TorusGeometry(15.3,.12,10,120),
+  new THREE.MeshBasicMaterial({color:0x72efff,transparent:true,opacity:.62,blending:THREE.AdditiveBlending})
+);
+energyRing.rotation.x = 1.08;
+core.add(energyRing);
 
 const data = [
   {name:'Merkurius',radius:20,size:1.45,speed:.009,color:0x9b9289,distance:'57,9 juta km',year:'88 hari',desc:'Planet terkecil dan paling dekat dengan Matahari, dengan perubahan suhu yang ekstrem.'},
@@ -97,7 +145,20 @@ document.querySelector('#reset-view').onclick=()=>{panel.classList.remove('open'
 document.querySelector('#toggle-motion').onclick=e=>{running=!running;e.currentTarget.textContent=running?'❚❚ JEDA ORBIT':'▶ LANJUTKAN ORBIT'};
 
 const clock=new THREE.Clock();
-function animate(){requestAnimationFrame(animate);const d=Math.min(clock.getDelta(),.04);if(running)planetMeshes.forEach((x,i)=>{x.pivot.rotation.y+=x.data.speed*d*60;x.mesh.rotation.y+=.006*d*60});core.rotation.z+=.0007;starsGeo.rotateY(.000025);if(targetPosition){camera.position.lerp(targetPosition,.055);if(camera.position.distanceTo(targetPosition)<.12)targetPosition=null}controls.update();renderer.render(scene,camera)}
+function animate(){
+  requestAnimationFrame(animate);
+  const d=Math.min(clock.getDelta(),.04), t=clock.elapsedTime;
+  if(running) planetMeshes.forEach((x,i)=>{x.pivot.rotation.y+=x.data.speed*d*60;x.mesh.rotation.y+=.006*d*60});
+  logo3D.quaternion.copy(camera.quaternion);
+  logo3D.rotateY(Math.sin(t*.72)*.13);
+  logo3D.rotateX(Math.cos(t*.58)*.045);
+  logo3D.position.y=Math.sin(t*1.05)*.38;
+  energyRing.rotation.z+=.0035*d*60;
+  energyRing.rotation.y+=.0014*d*60;
+  starsGeo.rotateY(.000025);
+  if(targetPosition){camera.position.lerp(targetPosition,.055);if(camera.position.distanceTo(targetPosition)<.12)targetPosition=null}
+  controls.update();renderer.render(scene,camera)
+}
 animate();
 addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);renderer.setPixelRatio(Math.min(devicePixelRatio,1.8))});
 setTimeout(()=>document.querySelector('#loading').classList.add('hide'),650);
