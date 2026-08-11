@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#02030a" />
+  <meta name="description" content="Tata surya 3D interaktif Bolapelangi2." />
+  <title>Bolapelangi2 — Tata Surya 3D</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="assets/css/style.css" />
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.168.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.168.0/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body>
+  <div id="loading" class="loading" role="status">
+    <div class="loading-orbit"><span></span></div>
+    <p>MEMUAT SEMESTA</p>
+  </div>
+
+  <canvas id="space" aria-label="Tata surya 3D interaktif"></canvas>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="Bolapelangi2">
+      <img src="assets/images/logo.png" alt="Bolapelangi2" />
+      <span><b>BOLAPELANGI2</b><small>INTERACTIVE UNIVERSE</small></span>
+    </a>
+    <div class="live"><i></i> SISTEM AKTIF</div>
+  </header>
+
+  <section class="hero-copy" aria-labelledby="hero-title">
+    <p class="eyebrow">JELAJAHI • PUTAR • TEMUKAN</p>
+    <h1 id="hero-title">SEMESTA<br /><span>DALAM GENGGAMAN</span></h1>
+    <p>Tarik untuk memutar, scroll untuk zoom, lalu pilih planet untuk melihat detailnya.</p>
+  </section>
+
+  <nav id="planet-nav" class="planet-nav" aria-label="Pilih planet"></nav>
+
+  <aside id="planet-panel" class="planet-panel" aria-live="polite">
+    <button id="close-panel" class="close" aria-label="Tutup informasi">×</button>
+    <p id="planet-index" class="panel-index">PLANET 03</p>
+    <h2 id="planet-name">BUMI</h2>
+    <p id="planet-description"></p>
+    <dl>
+      <div><dt>JARAK DARI MATAHARI</dt><dd id="planet-distance">149,6 juta km</dd></div>
+      <div><dt>PERIODE ORBIT</dt><dd id="planet-year">365 hari</dd></div>
+    </dl>
+  </aside>
+
+  <div class="controls-hint">
+    <span>↔ TARIK UNTUK MEMUTAR</span><span>⌁ SCROLL UNTUK ZOOM</span>
+  </div>
+
+  <div class="actions">
+    <button id="toggle-motion" type="button">❚❚ JEDA ORBIT</button>
+    <button id="reset-view" type="button">◎ KEMBALI KE PUSAT</button>
+  </div>
+
+  <noscript><div class="no-webgl">Aktifkan JavaScript untuk membuka tata surya 3D.</div></noscript>
+  <script type="module" src="assets/js/main.js"></script>
+</body>
+</html>
